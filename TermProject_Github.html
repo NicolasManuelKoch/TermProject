@@ -708,11 +708,18 @@
         loadVideo(0, true);
       }
 
-      video?.addEventListener('ended', () => {
+      function nextVideo() {
+        if (!video) return;
+
+        if (!hasStartedSlideshow) {
+          startSlideshow();
+          return;
+        }
+
         if (currentVideoIndex < playlist.length - 1) {
           loadVideo(currentVideoIndex + 1, true);
         }
-      });
+      }
 
       function centerVisual() {
         if (!focusTarget) return;
@@ -737,35 +744,19 @@
         }, reducedMotion ? 0 : 500);
       }
 
-      function firstInteractionStartSlideshow() {
-        startSlideshow();
-        document.removeEventListener('click', firstInteractionStartSlideshow, true);
-      }
+      document.addEventListener('click', (event) => {
+        const centerTrigger = event.target.closest('.js-center-brain');
+        const clickedBrainStage = event.target.closest('#brain-focus');
 
-      document.addEventListener('click', firstInteractionStartSlideshow, true);
-
-      document.querySelectorAll('.js-center-brain').forEach((trigger) => {
-        trigger.addEventListener('click', (event) => {
+        if (centerTrigger) {
           event.preventDefault();
-          startSlideshow();
           centerVisual();
-        });
-      });
+        } else if (clickedBrainStage) {
+          centerVisual();
+        }
 
-      focusTarget?.addEventListener('click', () => {
-        startSlideshow();
-        centerVisual();
-      });
-
-      function clickAnywhereToCenter(event) {
-        const interactive = event.target.closest('a, button, input, textarea, select, label, video');
-        if (interactive) return;
-        startSlideshow();
-        centerVisual();
-        document.removeEventListener('click', clickAnywhereToCenter, true);
-      }
-
-      document.addEventListener('click', clickAnywhereToCenter, true);
+        nextVideo();
+      }, true);
     })();
   </script>
 </body>
